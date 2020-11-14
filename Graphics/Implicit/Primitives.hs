@@ -120,7 +120,7 @@ circle ::
 circle   = Circle
 
 rectR ::
-    ℝ 				-- ^ Rounding of corners
+    ℝ               -- ^ Rounding of corners
     -> ℝ2           -- ^ Bottom left corner
     -> ℝ2           -- ^ Top right corner
     -> SymbolicObj2 -- ^ Resulting square (bottom right = (0,0) )
