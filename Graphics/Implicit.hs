@@ -8,7 +8,6 @@
 
 module Graphics.Implicit (
   module P,
-  module E,
   module W,
   writeSVG,
   writeDXF2,
@@ -16,8 +15,6 @@ module Graphics.Implicit (
   writeBinSTL,
   writeOBJ,
   writeTHREEJS,
-  writeSCAD2,
-  writeSCAD3,
   writeGCodeHacklabLaser,
   writePNG2,
   writePNG3
@@ -29,14 +26,11 @@ import Prelude(FilePath, IO)
 -- MAYBEFIXME: impliment slice operation, regularPolygon and zsurface primitives.
 import Graphics.Implicit.Primitives as P (translate, scale, complement, union, intersect, difference, unionR, intersectR, differenceR, shell, extrudeR, extrudeRM, extrudeRotateR, extrudeOnEdgeOf, sphere, rect3R, circle, cylinder, cylinder2, rectR, polygonR, rotateExtrude, rotate3, rotate3V, pack3, rotate, pack2, implicit)
 
--- The Extended OpenScad interpreter.
-import Graphics.Implicit.ExtOpenScad as E (runOpenscad)
-
 -- typesclasses and types defining the world, or part of the world.
 import Graphics.Implicit.Definitions as W (ℝ, SymbolicObj2, SymbolicObj3, ExtrudeRMScale(C1, C2, Fn))
 
 -- Functions for writing files based on the result of operations on primitives.
-import qualified Graphics.Implicit.Export as Export (writeSVG, writeDXF2, writeSTL, writeBinSTL, writeOBJ, writeSCAD2, writeSCAD3, writeTHREEJS, writeGCodeHacklabLaser, writePNG)
+import qualified Graphics.Implicit.Export as Export (writeSVG, writeDXF2, writeSTL, writeBinSTL, writeOBJ, writeTHREEJS, writeGCodeHacklabLaser, writePNG)
 
 -- We want Export to be a bit less polymorphic
 -- (so that types will collapse nicely)
@@ -55,12 +49,6 @@ writeBinSTL = Export.writeBinSTL
 
 writeOBJ :: ℝ -> FilePath -> SymbolicObj3 -> IO ()
 writeOBJ = Export.writeOBJ
-
-writeSCAD2 :: ℝ -> FilePath -> SymbolicObj2 -> IO ()
-writeSCAD2 = Export.writeSCAD2
-
-writeSCAD3 :: ℝ -> FilePath -> SymbolicObj3 -> IO ()
-writeSCAD3 = Export.writeSCAD3
 
 writeTHREEJS :: ℝ -> FilePath -> SymbolicObj3 -> IO ()
 writeTHREEJS = Export.writeTHREEJS

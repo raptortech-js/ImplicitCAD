@@ -6,9 +6,10 @@
 -- Allow us to use real types in the type constraints.
 {-# LANGUAGE FlexibleContexts #-}
 
-module Graphics.Implicit.Export (writeObject, formatObject, writeSVG, writeSTL, writeBinSTL, writeOBJ, writeTHREEJS, writeGCodeHacklabLaser, writeDXF2, writeSCAD2, writeSCAD3, writePNG) where
+module Graphics.Implicit.Export (writeObject, formatObject, writeSVG, writeSTL, writeBinSTL, writeOBJ, writeTHREEJS, writeGCodeHacklabLaser, writeDXF2, writePNG) where
 
 import Prelude (FilePath, IO, (.), ($))
+
 
 -- The types of our objects (before rendering), and the type of the resolution to render with.
 import Graphics.Implicit.Definitions (SymbolicObj2, SymbolicObj3, ℝ, Polyline, TriangleMesh, NormedTriangleMesh)
@@ -25,7 +26,6 @@ import Graphics.Implicit.Export.DiscreteAproxable (DiscreteAproxable, discreteAp
 import qualified Graphics.Implicit.Export.PolylineFormats as PolylineFormats (svg, hacklabLaserGCode, dxf2)
 import qualified Graphics.Implicit.Export.TriangleMeshFormats as TriangleMeshFormats (stl, binaryStl, jsTHREE)
 import qualified Graphics.Implicit.Export.NormedTriangleMeshFormats as NormedTriangleMeshFormats (obj)
-import qualified Graphics.Implicit.Export.SymbolicFormats as SymbolicFormats (scad2, scad3)
 import qualified Codec.Picture as ImageFormatCodecs (DynamicImage, savePngImage)
 
 -- | Write an object to a file with LazyText IO, using the given format writer function.
@@ -78,12 +78,6 @@ writeTHREEJS res = writeObject res TriangleMeshFormats.jsTHREE
 
 writeGCodeHacklabLaser :: DiscreteAproxable obj [Polyline] => ℝ -> FilePath -> obj -> IO ()
 writeGCodeHacklabLaser res = writeObject res PolylineFormats.hacklabLaserGCode
-
-writeSCAD3 :: ℝ -> FilePath -> SymbolicObj3 -> IO ()
-writeSCAD3 res filename obj = LT.writeFile filename $ SymbolicFormats.scad3 res obj
-
-writeSCAD2 :: ℝ -> FilePath -> SymbolicObj2 -> IO ()
-writeSCAD2 res filename obj = LT.writeFile filename $ SymbolicFormats.scad2 res obj
 
 writePNG :: DiscreteAproxable obj ImageFormatCodecs.DynamicImage => ℝ -> FilePath -> obj -> IO ()
 writePNG res = writeObject' res ImageFormatCodecs.savePngImage

@@ -23,14 +23,6 @@ BENCHBUILDROOT=${BUILDROOT}/b/
 exebin = ${EXEBUILDROOT}/$(1)/build/$(1)/$(1)
 exedir = ${EXEBUILDROOT}/$(1)
 
-# The location of the created extopenscad binary, for running shell based test cases.
-EXTOPENSCAD=extopenscad
-EXTOPENSCADBIN=$(call exebin,${EXTOPENSCAD})
-EXTOPENSCADDIR=$(call exedir,${EXTOPENSCAD})
-# The location of the implicitsnap binary, which listens for requests via http. The backend of the website.
-IMPLICITSNAP=implicitsnap
-IMPLICITSNAPBIN=$(call exebin,${IMPLICITSNAP})
-IMPLICITSNAPDIR=$(call exedir,${IMPLICITSNAP})
 # The location of the benchmark binary, for benchmarking some implicitcad internals.
 BENCHMARK=Benchmark
 BENCHMARKBIN=${BENCHBUILDROOT}/Benchmark/build/Benchmark/Benchmark
@@ -39,9 +31,6 @@ BENCHMARKDIR=${BENCHBUILDROOT}/Benchmark
 DOCGEN=docgen
 DOCGENBIN=$(call exebin,${DOCGEN})
 DOCGENDIR=$(call exedir,${DOCGEN})
-# The location of the parser benchmark binary, specifically for benchmarking implicitcad's parser.
-PARSERBENCH=${BENCHBUILDROOT}/parser-bench/build/parser-bench/parser-bench
-PARSERBENCHDIR=${BENCHBUILDROOT}/parser-bench
 # The location of the created test binary, for running haskell test cases.
 TESTSUITE=${TESTBUILDROOT}/test-implicit/build/test-implicit/test-implicit
 TESTSUITEDIR=${TESTBUILDROOT}/test-implicit
@@ -55,8 +44,6 @@ TESTFILES=$(shell find tests/ -name '*.hs')
 RTSOPTS=+RTS -N -qg -t
 # The resolution to generate objects at. FIXME: what does this mean in human terms? 
 RESOPTS=-r 50
-
-SCADOPTS?=-q
 
 # Uncomment for profiling support. Note that you will need to recompile all of the libraries, as well.
 #PROFILING= --enable-profiling
@@ -73,8 +60,8 @@ LIBTARGET=${BUILDROOT}/build/Graphics/Implicit.o
 # don't try to compile implicitsnap unless the flag for compiling it has been set.
 MAYBEIMPLICITSNAPBIN=$(shell bash -c "[ -n \"$$(cat cabal.project.local | sed -n '/flags: .*+implicitsnap.*/p')\" ] && echo ${IMPLICITSNAPBIN}" )
 
-EXECTARGETS=$(EXTOPENSCADBIN) $(MAYBEIMPLICITSNAPBIN) $(BENCHMARKBIN) $(TESTSUITE) $(PARSERBENCH) $(DOCGENBIN)
-EXECBUILDDIRS=$(EXTOPENSCADDIR) $(IMPLICITSNAPDIR) $(BENCHMARKDIR) $(DOCGENDIR)
+EXECTARGETS=$(BENCHMARKBIN) $(TESTSUITE) $(DOCGENBIN)
+EXECBUILDDIRS=$(BENCHMARKDIR) $(DOCGENDIR)
 TARGETS=$(EXECTARGETS) $(LIBTARGET)
 
 ROOT_DIR:=$(shell dirname $(realpath $(firstword $(MAKEFILE_LIST))))
@@ -141,11 +128,6 @@ docs: $(DOCGEN) Setup
 # Upload to hackage?
 dist: $(TARGETS) Setup
 	./Setup sdist
-
-# Generate examples.
-examples: $(EXTOPENSCADBIN)
-	cd Examples && for each in `find ./ -name '*scad' -type f | sort`; do { echo $$each ; ../$(EXTOPENSCADBIN) $(SCADOPTS) $$each $(RTSOPTS); } done
-	cd Examples && for each in `find ./ -name '*.hs' -type f | sort`; do { filename=$(basename "$$each"); filename="$${filename%.*}"; cd ..; $(GHC) Examples/$$filename.hs -o Examples/$$filename; cd Examples; echo $$filename; $$filename +RTS -t ; } done
 
 # Generate images from the examples, so we can upload the images to our website.
 images: examples

@@ -12,12 +12,6 @@ Maintainer:          Julia Longtin <julia.longtin@gmail.com>
 Homepage:            http://implicitcad.org/
 Category:            Graphics
 
-flag extopenscad
-  default:
-    True
-  description:
-    Builds extopenscad program
-
 flag docgen
   default:
     True
@@ -79,23 +73,15 @@ Library
                     Graphics.Implicit.Primitives
                     Graphics.Implicit.Export
                     Graphics.Implicit.MathUtil
-                    Graphics.Implicit.ExtOpenScad
                     Graphics.Implicit.ObjectUtil
-                    -- These modules are exposed for the unit tests against the parser interface.
-                    Graphics.Implicit.ExtOpenScad.Parser.Statement
-                    Graphics.Implicit.ExtOpenScad.Parser.Expr
-                    Graphics.Implicit.ExtOpenScad.Eval.Constant
-                    Graphics.Implicit.ExtOpenScad.Definitions
-                    -- These are exposed for Benchmark.
-                    Graphics.Implicit.Export.SymbolicObj2
-                    Graphics.Implicit.Export.SymbolicObj3
                     -- These are exposed for implicitsnap.
                     Graphics.Implicit.Export.TriangleMeshFormats
                     Graphics.Implicit.Export.NormedTriangleMeshFormats
                     Graphics.Implicit.Export.PolylineFormats
                     Graphics.Implicit.Export.DiscreteAproxable
-                    -- These are exposed for docgen.
-                    Graphics.Implicit.ExtOpenScad.Primitives            
+                    -- These are exposed for Benchmark.
+                    Graphics.Implicit.Export.SymbolicObj2
+                    Graphics.Implicit.Export.SymbolicObj3
 
     Other-modules:
                   Graphics.Implicit.FastIntUtil
@@ -104,17 +90,8 @@ Library
                   Graphics.Implicit.ObjectUtil.GetBox3
                   Graphics.Implicit.ObjectUtil.GetImplicit2
                   Graphics.Implicit.ObjectUtil.GetImplicit3
-                  Graphics.Implicit.ExtOpenScad.Default
-                  Graphics.Implicit.ExtOpenScad.Parser.Lexer
-                  Graphics.Implicit.ExtOpenScad.Parser.Util
-                  Graphics.Implicit.ExtOpenScad.Eval.Statement
-                  Graphics.Implicit.ExtOpenScad.Eval.Expr
-                  Graphics.Implicit.ExtOpenScad.Util.ArgParser
-                  Graphics.Implicit.ExtOpenScad.Util.OVal
-                  Graphics.Implicit.ExtOpenScad.Util.StateC
                   Graphics.Implicit.Export.MarchingSquaresFill
                   Graphics.Implicit.Export.RayTrace
-                  Graphics.Implicit.Export.SymbolicFormats
                   Graphics.Implicit.Export.Util
                   Graphics.Implicit.Export.TextBuilderUtils
                   Graphics.Implicit.Export.Symbolic.Rebound2
@@ -128,108 +105,6 @@ Library
                   Graphics.Implicit.Export.Render.RefineSegs
                   Graphics.Implicit.Export.Render.TesselateLoops
                   Graphics.Implicit.Export.Render.HandlePolylines
-
-Executable extopenscad
-   if !flag(extopenscad)
-     buildable: False
-   Main-is: extopenscad.hs
-   default-extensions: NoImplicitPrelude
-   Default-Language: Haskell2010
-   Hs-source-dirs: programs
-   Build-depends:
-                 base,
-                 vector-space,
-                 filepath,
-                 optparse-applicative >= 0.10.0,
-                 text,
-                 implicit
-   Ghc-options:
---               -O2
-               -optc-O3
-               -threaded
-               -rtsopts "-with-rtsopts -N -qg -t"
---               -dynamic
-               -- see GHC manual 8.2.1 section 6.5.1.
-               -feager-blackholing
-               -- for debugging.
-               -Wall
-               -Wcompat
-               -Wmonomorphism-restriction
-               -Wmissing-signatures
-               -Wmissing-export-lists
-               -Wmissing-import-lists
-               -Wmissing-home-modules
-               -Widentities
-               -Wimplicit-prelude
-               -Wredundant-constraints
-               -Wall-missed-specialisations
---               -Werror
-
-Executable docgen
-   if !flag(docgen)
-     buildable: False
-   main-is: docgen.hs
-   default-extensions: NoImplicitPrelude
-   Default-Language: Haskell2010
-   Hs-source-dirs: programs
-   build-depends:
-                 base,
-                 text,
-                 implicit
-   ghc-options:
---               -dynamic
-               -- for debugging.
-               -Wall
-               -Wcompat
-               -Wmonomorphism-restriction
-               -Wmissing-signatures
-               -Wmissing-export-lists
-               -Wmissing-import-lists
-               -Wmissing-home-modules
-               -Widentities
-               -Wimplicit-prelude
-               -Wredundant-constraints
-               -Wall-missed-specialisations
---               -Werror
-
-Executable implicitsnap
-   if !flag(implicitsnap)
-     buildable: False
-   Main-is: implicitsnap.hs
-   default-extensions: NoImplicitPrelude
-   Default-Language: Haskell2010
-   Hs-source-dirs: programs
-   Build-depends:
-                 aeson,
-                 base,
-                 bytestring,
-                 implicit,
-                 snap-core,
-                 snap-server,
-                 text,
-                 utf8-string,
-                 vector-space
-   Ghc-options:
-               -threaded
-               -rtsopts "-with-rtsopts -N -qg -t"
---               -O2
-               -optc-O3
---               -dynamic
-               -- see GHC manual 8.2.1 section 6.5.1.
-               -feager-blackholing
-               -- for debugging.
-               -Wall
-               -Wcompat
-               -Wmonomorphism-restriction
-               -Wmissing-signatures
-               -Wmissing-export-lists
-               -Wmissing-import-lists
-               -Wmissing-home-modules
-               -Widentities
-               -Wimplicit-prelude
-               -Wredundant-constraints
-               -Wall-missed-specialisations
---               -Werror
 
 Benchmark Benchmark
    Type: exitcode-stdio-1.0
@@ -304,34 +179,6 @@ Test-suite test-implicit
                   PropertySpec
                   PropertySpec.Exec
 
-Benchmark parser-bench
-    Type: exitcode-stdio-1.0
-    default-extensions: NoImplicitPrelude
-    Default-Language: Haskell2010
-    Build-depends:
-                  base,
-                  criterion,
-                  parsec,
-                  implicit
-    Main-is: parser-bench.hs
-    Hs-source-dirs: programs
-    Ghc-options:
---                -O2
-                -optc-O3
---                -dynamic
-                -- for debugging.
-                -Wall
-                -Wcompat
-                -Wmonomorphism-restriction
-                -Wmissing-signatures
-                -Wmissing-export-lists
-                -Wmissing-import-lists
-                -Wmissing-home-modules
-                -Widentities
-                -Wimplicit-prelude
-                -Wredundant-constraints
-                -Wall-missed-specialisations
---                -Werror
 
 Source-repository head
     Type:            git
