@@ -10,8 +10,10 @@ module Graphics.Implicit.Export.SymbolicFormats (scad2, scad3) where
 
 import Prelude(Either(Left, Right), ($), (*), ($!), (-), (/), pi, error, (+), (==), take, floor, (&&), const, pure, (<>), sequenceA, (<$>))
 
-import Graphics.Implicit.Definitions(ℝ, SymbolicObj2(RectR, Circle, PolygonR, Complement2, UnionR2, DifferenceR2, IntersectR2, Translate2, Scale2, Rotate2, Outset2, Shell2, EmbedBoxedObj2), SymbolicObj3(Rect3R, Sphere, Cylinder, Complement3, UnionR3, IntersectR3, DifferenceR3, Translate3, Scale3, Rotate3, Rotate3V, Outset3, Shell3, ExtrudeR, ExtrudeRotateR, ExtrudeRM, EmbedBoxedObj3, RotateExtrude, ExtrudeOnEdgeOf), isScaleID)
+import Graphics.Implicit.Definitions(ℝ)
 import Graphics.Implicit.Export.TextBuilderUtils(Text, Builder, toLazyText, fromLazyText, bf)
+import Graphics.Implicit.Export.MySymbolicObj2 (MySymbolicObj2 (myScad2))
+import Graphics.Implicit.Export.MySymbolicObj3 (MySymbolicObj3 (myScad3))
 
 import Control.Monad.Reader (Reader, runReader, ask)
 
@@ -21,10 +23,10 @@ import Data.Foldable(fold, foldMap)
 
 default (ℝ)
 
-scad2 :: ℝ -> SymbolicObj2 -> Text
+scad2 :: ℝ -> MySymbolicObj2 -> Text
 scad2 res obj = toLazyText $ runReader (buildS2 obj) res
 
-scad3 :: ℝ -> SymbolicObj3 -> Text
+scad3 :: ℝ -> MySymbolicObj3 -> Text
 scad3 res obj = toLazyText $ runReader (buildS3 obj) res
 
 -- used by rotate2 and rotate3
@@ -50,8 +52,10 @@ callNaked :: Builder -> [Builder] -> [Reader a Builder] -> Reader a Builder
 callNaked = callToken ("", "")
 
 -- | First, the 3D objects.
-buildS3 :: SymbolicObj3 -> Reader ℝ Builder
 
+buildS3 :: MySymbolicObj3 -> Reader ℝ Builder
+buildS3 x = myScad3 x
+{-
 buildS3 (Rect3R r (x1,y1,z1) (x2,y2,z2)) | r == 0 = call "translate" [bf x1, bf y1, bf z1] [
                                             call "cube" [bf $ x2 - x1, bf $ y2 - y1, bf $ z2 - z1] []
                                            ]
@@ -121,11 +125,12 @@ buildS3 ExtrudeRM{} = error "cannot provide roundness when exporting openscad; u
 buildS3(EmbedBoxedObj3 _) = error "cannot provide roundness when exporting openscad; unsupported in target format."
 buildS3 RotateExtrude{} = error "cannot provide roundness when exporting openscad; unsupported in target format."
 buildS3(ExtrudeOnEdgeOf _ _) = error "cannot provide roundness when exporting openscad; unsupported in target format."
-
+-}
 -- Now the 2D objects/transforms.
 
-buildS2 :: SymbolicObj2 -> Reader ℝ Builder
-
+buildS2 :: MySymbolicObj2 -> Reader ℝ Builder
+buildS2 x = myScad2 x
+{-
 buildS2 (RectR r (x1,y1) (x2,y2)) | r == 0 = call "translate" [bf x1, bf y1] [
                                     call "cube" [bf $ x2 - x1, bf $ y2 - y1] []
                                    ]
@@ -164,4 +169,4 @@ buildS2 (Shell2 _ _) = error "cannot provide roundness when exporting openscad; 
 
 -- FIXME: missing EmbedBoxedObj2?
 buildS2 (EmbedBoxedObj2 _) = error "EmbedBoxedObj2 not implemented."
-
+-}

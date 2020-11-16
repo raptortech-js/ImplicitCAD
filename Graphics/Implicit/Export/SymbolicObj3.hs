@@ -7,19 +7,17 @@
 
 module Graphics.Implicit.Export.SymbolicObj3 (symbolicGetMesh) where
 
-import Prelude(zip, length, filter, (>), ($), null, (<>), foldMap, (.), (<$>))
+--import Prelude(zip, length, filter, (>), ($), null, (<>), foldMap, (.), (<$>))
 
-import Graphics.Implicit.Definitions (ℝ, ℝ3, SymbolicObj3(UnionR3), Triangle, TriangleMesh(TriangleMesh))
+import Graphics.Implicit.Definitions (ℝ, TriangleMesh)
+import Graphics.Implicit.Export.MySymbolicObj3 (MySymbolicObj3 (implicit3, box3))
 import Graphics.Implicit.Export.Render (getMesh)
-import Graphics.Implicit.ObjectUtil (getBox3, getImplicit3)
-import Graphics.Implicit.MathUtil(box3sWithin)
 import Graphics.Implicit.Export.Symbolic.Rebound3 (rebound3)
 
-import Control.Arrow(first, second)
 
-symbolicGetMesh :: ℝ -> SymbolicObj3 -> TriangleMesh
+symbolicGetMesh :: ℝ -> MySymbolicObj3 -> TriangleMesh
 
-{--
+{- blash
 -- A translated objects mesh is its mesh translated.
 symbolicGetMesh res (Translate3 v obj) = 
     fmap (\(a,b,c) -> (a S.+ v, b S.+ v, c S.+ v) ) (symbolicGetMesh res obj)
@@ -65,12 +63,12 @@ symbolicGetMesh res (Sphere r) = half1 <> half2
         half2 = fold [ rsquare (f m1 m2) (f (m1+1) m2) (f (m1+1) (m2+1)) (f m1 (m2+1))
                         | m1 <- [m.. n-1], m2 <- [0.. m-1] ]
 
-{-symbolicGetMesh res (UnionR3 r [ExtrudeR ra obja ha, ExtrudeR rb objb hb]) 
+symbolicGetMesh res (UnionR3 r [ExtrudeR ra obja ha, ExtrudeR rb objb hb]) 
     | ha == hb && ra == rb = symbolicGetMesh res $ ExtrudeR ra (UnionR2 r [obja, objb]) ha
 
 symbolicGetMesh res (UnionR3 r [ExtrudeR ra obja ha, ExtrudeR rb objb hb, ExtrudeR rc objc hc]) 
     | ha == hb && ha == hc && ra == rb && ra == rc = 
-        symbolicGetMesh res $ ExtrudeR ra (UnionR2 r [obja, objb, objc]) ha-}
+        symbolicGetMesh res $ ExtrudeR ra (UnionR2 r [obja, objb, objc]) ha
 
 -- We can compute a mesh of a rounded, extruded object from it contour, 
 -- contour filling trinagles, and magic.
@@ -104,7 +102,7 @@ symbolicGetMesh res  (ExtrudeR r obj2 h) =
         side_tris = foldMap (\(a,b) -> segToSide a b) segs
         -- Triangles that fill the contour. Make sure the mesh is at least (res/5) fine.
         -- --res/5 because xyres won't always match up with normal res and we need to compensate.
-        fill_tris = {-divideMeshTo (res/5) $-} symbolicGetContourMesh res obj2
+        fill_tris = {-divideMeshTo (res/5) $ symbolicGetContourMesh res obj2
         -- The bottom. Use dh to determine the z coordinates
         bottom_tris = fmap flipTri $ [((a1,a2,r-dh a1 a2), (b1,b2,r - dh b1 b2), (c1,c2,r - dh c1 c2))
                 | ((a1,a2),(b1,b2),(c1,c2)) <- fill_tris]
@@ -167,7 +165,7 @@ symbolicGetMesh res  (ExtrudeRM r twist scale translate obj2 h) =
             [foldMap (\(a,b) -> segToSide m a b) segs | m <- [0.. n-1] ]
         -- Triangles that fill the contour. Make sure the mesh is at least (res/5) fine.
         -- --res/5 because xyres won't always match up with normal res and we need to compensate.
-        fill_tris = {-divideMeshTo (res/5) $-} symbolicGetContourMesh res obj2
+        fill_tris = divideMeshTo (res/5) $ symbolicGetContourMesh res obj2
         -- The bottom. Use dh to determine the z coordinates
         bottom_tris = [((a1,a2,r-dh a1 a2), (b1,b2,r - dh b1 b2), (c1,c2,r - dh c1 c2))
                 | ((a1,a2),(b1,b2),(c1,c2)) <- fill_tris]
@@ -189,7 +187,7 @@ symbolicGetMesh res  (ExtrudeRM r twist scale translate obj2 h) =
 
     in
         fmap transformTriangle (side_tris <> bottom_tris <> top_tris)
--}
+
 
 symbolicGetMesh res inputObj@(UnionR3 r objs) = TriangleMesh $
     let
@@ -212,11 +210,14 @@ symbolicGetMesh res inputObj@(UnionR3 r objs) = TriangleMesh $
     else  foldMap (unmesh . symbolicGetMesh res) independents
         <> unmesh (symbolicGetMesh res (UnionR3 r dependants))
 
+-}
+
 -- | If all that fails, coerce and apply marching cubes :(
+-}
 symbolicGetMesh res obj =
   -- Use rebound3 to stretch bounding box.
-  case rebound3 (getImplicit3 obj, getBox3 obj) of
+  case rebound3 (implicit3 obj, box3 obj) of
     (obj', (a,b)) -> getMesh a b (res,res,res) obj'
 
-unmesh :: TriangleMesh -> [Triangle]
-unmesh (TriangleMesh m) = m
+--unmesh :: TriangleMesh -> [Triangle]
+--unmesh (TriangleMesh m) = m

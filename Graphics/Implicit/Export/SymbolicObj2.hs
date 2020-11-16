@@ -6,15 +6,15 @@
 -- If it can't, it passes the puck to a marching-squares-like
 -- algorithm...
 
-module Graphics.Implicit.Export.SymbolicObj2 (symbolicGetOrientedContour, symbolicGetContour, symbolicGetContourMesh) where
+module Graphics.Implicit.Export.SymbolicObj2 (symbolicGetOrientedContour) where
 
-import Prelude(fmap, ($), (-), (/), (+), (>), (*), reverse, cos, pi, sin, max, ceiling, (<$>))
+import Prelude(fmap, ($), (-), (/), (+), (>), (*), reverse, cos, pi, sin, max, ceiling, (<$>), Maybe (Just, Nothing))
 
-import Graphics.Implicit.Definitions (ℝ, ℝ2, Fastℕ, SymbolicObj2(RectR, Circle, Translate2, Scale2), Polyline(Polyline), Polytri(Polytri), (⋯*), fromFastℕtoℝ)
+import Graphics.Implicit.Definitions (ℝ, ℝ2, Fastℕ, Polyline(Polyline), Polytri(Polytri), (⋯*), fromFastℕtoℝ)
+
+import Graphics.Implicit.Export.MySymbolicObj2 (MySymbolicObj2 (implicit2, box2, symbolicGetContour))
 
 import Graphics.Implicit.Export.MarchingSquaresFill (getContourMesh)
-
-import Graphics.Implicit.ObjectUtil (getImplicit2, getBox2)
 
 import Graphics.Implicit.Export.Symbolic.Rebound2 (rebound2)
 
@@ -22,10 +22,10 @@ import Graphics.Implicit.Export.Render (getContour)
 
 import Data.VectorSpace ((^/), magnitude)
 
-symbolicGetOrientedContour :: ℝ ->  SymbolicObj2 -> [Polyline]
-symbolicGetOrientedContour res symbObj = orient <$> symbolicGetContour res symbObj
+symbolicGetOrientedContour :: ℝ ->  MySymbolicObj2 -> [Polyline]
+symbolicGetOrientedContour res symbObj = orient <$> symbolicGetContour2 res symbObj
     where
-        obj = getImplicit2 symbObj
+        obj = implicit2 symbObj
         -- FIXME: cowardly case handling.
         orient :: Polyline -> Polyline
         orient (Polyline points@(p1:p2:_)) =
@@ -38,7 +38,15 @@ symbolicGetOrientedContour res symbObj = orient <$> symbolicGetContour res symbO
         orient (Polyline []) = Polyline []
         orient (Polyline [_]) = Polyline []
 
-symbolicGetContour :: ℝ -> SymbolicObj2 -> [Polyline]
+symbolicGetContour2 :: ℝ -> MySymbolicObj2 -> [Polyline]
+symbolicGetContour2 res obj = case symbolicGetContour obj of
+        Just y -> y res
+        Nothing -> backup
+    where
+        backup = case rebound2 (implicit2 obj, box2 obj) of
+            (obj', (a,b)) -> getContour a b (res,res) obj'
+
+{-symbolicGetContour :: ℝ -> SymbolicObj2 -> [Polyline]
 symbolicGetContour _ (RectR 0 (x1,y1) (x2,y2)) = [Polyline [ (x1,y1), (x2,y1), (x2,y2), (x1,y2), (x1,y1) ]]
 -- FIXME: magic number.
 symbolicGetContour res (Circle r) = [Polyline [ ( r*cos(2*pi*fromFastℕtoℝ m/fromFastℕtoℝ n), r*sin(2*pi*fromFastℕtoℝ m/fromFastℕtoℝ n) ) | m <- [0.. n] ]] where
@@ -49,13 +57,14 @@ symbolicGetContour res (Scale2 s@(a,b) obj) = appOpPolylines (⋯* s) $ symbolic
     where sc = max a b
 symbolicGetContour res obj = case rebound2 (getImplicit2 obj, getBox2 obj) of
     (obj', (a,b)) -> getContour a b (res,res) obj'
+-}
 
 appOpPolylines :: (ℝ2 -> ℝ2) -> [Polyline] -> [Polyline]
 appOpPolylines op = fmap (appOpPolyline op)
 appOpPolyline :: (ℝ2 -> ℝ2) -> Polyline -> Polyline
 appOpPolyline op (Polyline xs) = Polyline $ fmap op xs
 
-symbolicGetContourMesh :: ℝ ->  SymbolicObj2 -> [Polytri]
+{-symbolicGetContourMesh :: ℝ ->  SymbolicObj2 -> [Polytri]
 symbolicGetContourMesh res (Translate2 v obj) = (\(Polytri (a,b,c)) -> Polytri (a + v, b + v, c + v)) <$>
                                                 symbolicGetContourMesh res obj
 symbolicGetContourMesh res (Scale2 s@(a,b) obj) = (\(Polytri (c,d,e)) -> Polytri (c ⋯* s, d ⋯* s, e ⋯* s)) <$>
@@ -72,3 +81,4 @@ symbolicGetContourMesh res (Circle r) =
       n = max 5 $ ceiling $ 2*pi*r/res
 symbolicGetContourMesh res obj = case rebound2 (getImplicit2 obj, getBox2 obj) of
     (obj', (a,b)) -> getContourMesh a b (res,res) obj'
+-}

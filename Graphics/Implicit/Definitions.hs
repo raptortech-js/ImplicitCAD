@@ -36,52 +36,13 @@ module Graphics.Implicit.Definitions (
     Boxed3,
     BoxedObj2,
     BoxedObj3,
-    SymbolicObj2(
-        RectR,
-        Circle,
-        PolygonR,
-        Complement2,
-        UnionR2,
-        DifferenceR2,
-        IntersectR2,
-        Translate2,
-        Scale2,
-        Rotate2,
-        Shell2,
-        Outset2,
-        EmbedBoxedObj2),
-    SymbolicObj3(
-        Rect3R,
-        Sphere,
-        Cylinder,
-        Complement3,
-        UnionR3,
-        IntersectR3,
-        DifferenceR3,
-        Translate3,
-        Scale3,
-        Rotate3,
-        Rotate3V,
-        Shell3,
-        Outset3,
-        EmbedBoxedObj3,
-        ExtrudeR,
-        ExtrudeRotateR,
-        ExtrudeRM,
-        ExtrudeOnEdgeOf,
-        RotateExtrude),
-    ExtrudeRMScale(C1, C2, Fn),
     fromℕtoℝ,
     fromFastℕtoℝ,
-    fromℝtoFloat,
-    toScaleFn,
-    isScaleID,
+    fromℝtoFloat
     )
 where
 
-import Prelude (Show, Double, Either(Left, Right), Bool(True, False), show, (*), (/), fromIntegral, Float, realToFrac)
-
-import Data.Maybe (Maybe)
+import Prelude (Show, Double, Either, show, (*), (/), fromIntegral, Float, realToFrac)
 
 import Data.VectorSpace (Scalar, InnerSpace, (<.>))
 
@@ -240,86 +201,3 @@ type BoxedObj2 = Boxed2 Obj2
 type BoxedObj3 = Boxed3 Obj3
 --instance Show BoxedObj3 where
 --    show _ = "<BoxedObj3>"
-
--- | A symbolic 2D object format.
---   We want to have symbolic objects so that we can
---   accelerate rendering & give ideal meshes for simple
---   cases.
-data SymbolicObj2 =
-    -- Primitives
-      RectR ℝ ℝ2 ℝ2   -- rounding, start, stop.
-    | Circle ℝ        -- radius.
-    | PolygonR ℝ [ℝ2] -- rounding, points.
-    -- (Rounded) CSG
-    | Complement2 SymbolicObj2
-    | UnionR2 ℝ [SymbolicObj2]
-    | DifferenceR2 ℝ [SymbolicObj2]
-    | IntersectR2 ℝ [SymbolicObj2]
-    -- Simple transforms
-    | Translate2 ℝ2 SymbolicObj2
-    | Scale2 ℝ2 SymbolicObj2
-    | Rotate2 ℝ SymbolicObj2
-    -- Boundary mods
-    | Outset2 ℝ SymbolicObj2
-    | Shell2 ℝ SymbolicObj2
-    -- Misc
-    | EmbedBoxedObj2 BoxedObj2
-    deriving Show
-
--- | A symbolic 3D format!
-data SymbolicObj3 =
-    -- Primitives
-      Rect3R ℝ ℝ3 ℝ3 -- rounding, start, stop.
-    | Sphere ℝ -- radius
-    | Cylinder ℝ ℝ ℝ --
-    -- (Rounded) CSG
-    | Complement3 SymbolicObj3
-    | UnionR3 ℝ [SymbolicObj3]
-    | DifferenceR3 ℝ [SymbolicObj3]
-    | IntersectR3 ℝ [SymbolicObj3]
-    -- Simple transforms
-    | Translate3 ℝ3 SymbolicObj3
-    | Scale3 ℝ3 SymbolicObj3
-    | Rotate3 ℝ3 SymbolicObj3
-    | Rotate3V ℝ ℝ3 SymbolicObj3
-    -- Boundary mods
-    | Outset3 ℝ SymbolicObj3
-    | Shell3 ℝ SymbolicObj3
-    -- Misc
-    | EmbedBoxedObj3 BoxedObj3
-    -- 2D based
-    | ExtrudeR ℝ SymbolicObj2 ℝ
-    | ExtrudeRotateR ℝ ℝ SymbolicObj2 ℝ
-    | ExtrudeRM
-        ℝ                     -- rounding radius
-        (Either ℝ (ℝ -> ℝ))   -- twist
-        ExtrudeRMScale        -- scale
-        (Either ℝ2 (ℝ -> ℝ2)) -- translate
-        SymbolicObj2          -- object to extrude
-        (Either ℝ (ℝ2 -> ℝ))  -- height to extrude to
-    | RotateExtrude
-        ℝ                     -- Angle to sweep to
-        (Maybe ℝ)             -- Loop or path (rounded corner)
-        (Either ℝ2 (ℝ -> ℝ2)) -- translate
-        (Either ℝ  (ℝ -> ℝ )) -- rotate
-        SymbolicObj2          -- object to extrude
-    | ExtrudeOnEdgeOf SymbolicObj2 SymbolicObj2
-    deriving Show
-
-data ExtrudeRMScale =
-      C1 ℝ                  -- constant ℝ
-    | C2 ℝ2                 -- constant ℝ2
-    | Fn (ℝ -> Either ℝ ℝ2) -- function mapping height to either ℝ or ℝ2
-    deriving Show
-
-toScaleFn :: ExtrudeRMScale -> ℝ -> ℝ2
-toScaleFn (C1 s) _ = (s, s)
-toScaleFn (C2 s) _ = s
-toScaleFn (Fn f) z = case f z of
-    Left s -> (s, s)
-    Right s -> s
-
-isScaleID :: ExtrudeRMScale -> Bool
-isScaleID (C1 1) = True
-isScaleID (C2 (1, 1)) = True
-isScaleID _ = False

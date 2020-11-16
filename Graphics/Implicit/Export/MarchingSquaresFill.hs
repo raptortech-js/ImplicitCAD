@@ -5,7 +5,7 @@
 -- exports getContourMesh, which returns an array of triangles describing the interior of a 2D object.
 module Graphics.Implicit.Export.MarchingSquaresFill (getContourMesh) where
 
-import Prelude(Bool(True, False), ($), (-), (+), (/), (*), (<=), ceiling, max, div, floor)
+import Prelude(Bool(True, False), ($), (-), (+), (/), (*), (<=), ceiling, max, div, floor, undefined)
 
 import Graphics.Implicit.Definitions (ℕ, ℝ, ℝ2, both, Polytri(Polytri), Obj2, (⋯/), (⋯*), fromℕtoℝ, fromℕ)
 
@@ -17,6 +17,31 @@ import Data.Foldable (fold)
 
 -- Each step on the Y axis is done in parallel using Control.Parallel.Strategies
 import Control.Parallel.Strategies (using, rdeepseq, parBuffer, parList)
+
+dualContour2D :: ℝ2 -> ℝ2 -> ℝ2 -> Obj2 -> [Polytri]
+dualContour2D p1 p2 resolution object =
+    let
+        -- | How much space are we rendering?
+        d = p2 ^-^ p1
+
+        nx :: ℕ
+        ny :: ℕ
+        n@(nx,ny) = ceiling `both` (d ⋯/ resolution)
+
+        -- | A helper for calculating a position inside of the space.
+        gridPos :: (ℕ,ℕ) -> (ℕ,ℕ) -> ℝ2
+        gridPos n' m = p1 ^+^ d ⋯* ((fromℕtoℝ `both` m) ⋯/ (fromℕtoℝ `both` n'))
+
+        -- | Alternate Grid mapping funcs
+        toGrid :: ℝ2 -> (ℕ,ℕ)
+        toGrid f = floor `both` ((fromℕtoℝ `both` n) ⋯* (f ^-^ p1) ⋯/ d)
+
+        -- | Evaluate obj on a grid, in parallel.
+        valsOnGrid :: [[ℝ]]
+        valsOnGrid = [[ object $ gridPos n (mx, my) | mx <- [0..nx-1] ] | my <- [0..ny-1] ] `using` parList rdeepseq
+    in
+        undefined
+        
 
 -- | Get an array of triangles describing the interior of a 2D object.
 getContourMesh :: ℝ2 -> ℝ2 -> ℝ2 -> Obj2 -> [Polytri]

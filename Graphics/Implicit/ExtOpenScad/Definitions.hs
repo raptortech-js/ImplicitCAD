@@ -29,7 +29,10 @@ module Graphics.Implicit.ExtOpenScad.Definitions (ArgParser(AP, APTest, APBranch
 import Prelude(Eq, Show, Ord, Maybe(Just), Bool(False), IO, FilePath, (==), show, ($), (<>), and, zipWith, Int)
 
 -- Resolution of the world, Integer type, and symbolic languages for 2D and 3D objects.
-import Graphics.Implicit.Definitions (ℝ, ℕ, Fastℕ, SymbolicObj2, SymbolicObj3, fromFastℕ)
+import Graphics.Implicit.Definitions (ℝ, ℕ, Fastℕ, fromFastℕ)
+
+import Graphics.Implicit.Export.MySymbolicObj2 (MySymbolicObj2)
+import Graphics.Implicit.Export.MySymbolicObj3 (MySymbolicObj3)
 
 import Control.Applicative (Applicative, Alternative((<|>), empty), pure, (<*>))
 
@@ -144,8 +147,8 @@ data OVal = OUndefined
          -- Name, implementation, arguments, whether the module accepts/requires a suite.
          | ONModule Symbol (SourcePosition -> [OVal] -> ArgParser (StateC [OVal])) [([(Symbol, Bool)],  Maybe Bool)]
          | OVargsModule Symbol (Symbol -> SourcePosition -> [(Maybe Symbol, OVal)] -> [StatementI] -> ([StatementI] -> StateC ()) -> StateC ())
-         | OObj3 SymbolicObj3
-         | OObj2 SymbolicObj2
+         | OObj3 MySymbolicObj3
+         | OObj2 MySymbolicObj2
 
 instance Eq OVal where
     (OBool a) == (OBool b) = a == b

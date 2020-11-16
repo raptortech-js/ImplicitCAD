@@ -16,7 +16,10 @@ module Graphics.Implicit.ExtOpenScad.Util.OVal(OTypeMirror, (<||>), fromOObj, to
 
 import Prelude(Maybe(Just, Nothing), Bool(True, False), Either(Left,Right), (==), fromInteger, floor, ($), (.), fmap, error, (<>), show, flip, filter, not, return)
 
-import Graphics.Implicit.Definitions(ℝ, ℝ2, ℕ, SymbolicObj2, SymbolicObj3, ExtrudeRMScale(C1, C2, Fn), fromℕtoℝ)
+import Graphics.Implicit.Definitions(ℝ, ℝ2, ℕ, fromℕtoℝ)
+
+import Graphics.Implicit.Export.MySymbolicObj2 (MySymbolicObj2)
+import Graphics.Implicit.Export.MySymbolicObj3 (MySymbolicObj3, ExtrudeRMScale(C1, C2, Fn))
 
 import Graphics.Implicit.ExtOpenScad.Definitions (OVal(ONum, OBool, OString, OList, OFunc, OUndefined, OUModule, ONModule, OVargsModule, OError, OObj2, OObj3))
 
@@ -164,7 +167,7 @@ infixr 2 <||>
         maybe (g input) f coerceAttempt
 
 -- separate 2d and 3d objects from a set of OVals.
-divideObjs :: [OVal] -> ([SymbolicObj2], [SymbolicObj3], [OVal])
+divideObjs :: [OVal] -> ([MySymbolicObj2], [MySymbolicObj3], [OVal])
 divideObjs children =
     runEval $ do
     obj2s <- rseq [ x | OObj2 x <- children ]
