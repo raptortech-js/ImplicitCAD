@@ -14,13 +14,14 @@ module Graphics.Implicit.Export.DiscreteAproxable (DiscreteAproxable, discreteAp
 import Prelude((-), (/), ($), (<), fmap, round, (+), maximum, abs, (*), fromIntegral, max, realToFrac, Int)
 
 -- Definitions for our number system, objects, and the things we can use to approximately represent objects.
-import Graphics.Implicit.Definitions (ℝ, ℝ2, SymbolicObj2, SymbolicObj3, Polyline, Triangle, TriangleMesh(TriangleMesh), NormedTriangleMesh(NormedTriangleMesh))
+import Graphics.Implicit.Definitions (ℝ, ℝ2, Polyline, Triangle, TriangleMesh(TriangleMesh), NormedTriangleMesh(NormedTriangleMesh))
 
-import Graphics.Implicit.ObjectUtil (getImplicit2, getImplicit3, getBox2, getBox3)
+import Graphics.Implicit.Export.MySymbolicObj2 (MySymbolicObj2 (implicit2, box2))
+import Graphics.Implicit.Export.MySymbolicObj3 (MySymbolicObj3 (implicit3, box3))
 
 import Graphics.Implicit.Export.SymbolicObj3 (symbolicGetMesh)
 
-import Graphics.Implicit.Export.SymbolicObj2 (symbolicGetContour)
+import Graphics.Implicit.Export.SymbolicObj2 (symbolicGetContour2)
 
 import Graphics.Implicit.Export.Util (normTriangle)
 
@@ -46,24 +47,24 @@ unmesh (TriangleMesh m) = m
 class DiscreteAproxable obj aprox where
     discreteAprox :: ℝ -> obj -> aprox
 
-instance DiscreteAproxable SymbolicObj3 TriangleMesh where
+instance DiscreteAproxable MySymbolicObj3 TriangleMesh where
     discreteAprox = symbolicGetMesh
 
-instance DiscreteAproxable SymbolicObj3 NormedTriangleMesh where
+instance DiscreteAproxable MySymbolicObj3 NormedTriangleMesh where
     discreteAprox res obj = NormedTriangleMesh
-        ([ normTriangle res (getImplicit3 obj) rawMesh
+        ([ normTriangle res (implicit3 obj) rawMesh
             | rawMesh <- unmesh $ symbolicGetMesh res obj
          ] `using` parBuffer 32 rdeepseq)
 
 -- FIXME: way too many magic numbers.
 -- FIXME: adjustable resolution!
-instance DiscreteAproxable SymbolicObj3 DynamicImage where
+instance DiscreteAproxable MySymbolicObj3 DynamicImage where
     discreteAprox _ symbObj = ImageRGBA8 $ generateImage pixelRenderer (round w) (round h)
         where
             -- | Size of the image to produce.
             (w,h) = (150, 150) :: ℝ2
-            obj = getImplicit3 symbObj
-            box@((x1,y1,z1), (_,y2,z2)) = getBox3 symbObj
+            obj = implicit3 symbObj
+            box@((x1,y1,z1), (_,y2,z2)) = box3 symbObj
             av :: ℝ -> ℝ -> ℝ
             av a b = (a+b)/2
             avY = av y1 y2
@@ -97,18 +98,18 @@ instance DiscreteAproxable SymbolicObj3 DynamicImage where
                       colorToPixelRGBA8 :: Color -> PixelRGBA8
                       colorToPixelRGBA8 (Color rr gg bb aa) = PixelRGBA8 rr gg bb aa
 
-instance DiscreteAproxable SymbolicObj2 [Polyline] where
-    discreteAprox = symbolicGetContour
+instance DiscreteAproxable MySymbolicObj2 [Polyline] where
+    discreteAprox = symbolicGetContour2
 
 -- FIXME: way too many magic numbers.
 -- FIXME: adjustable resolution?
-instance DiscreteAproxable SymbolicObj2 DynamicImage where
+instance DiscreteAproxable MySymbolicObj2 DynamicImage where
     discreteAprox _ symbObj = ImageRGBA8 $ generateImage pixelRenderer (round w) (round h)
         where
             -- | Size of the image to produce.
             (w,h) = (150, 150) :: ℝ2
-            obj = getImplicit2 symbObj
-            (p1@(x1,_), p2@(_,y2)) = getBox2 symbObj
+            obj = implicit2 symbObj
+            (p1@(x1,_), p2@(_,y2)) = box2 symbObj
             (dx, dy) = p2 ^-^ p1
             dxy = max dx dy
             -- | passed to generateImage, it's external, and determines this type.

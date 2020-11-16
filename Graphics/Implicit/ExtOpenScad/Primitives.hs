@@ -17,7 +17,12 @@ module Graphics.Implicit.ExtOpenScad.Primitives (primitiveModules) where
 
 import Prelude(Either(Left, Right), Bool(True, False), Maybe(Just, Nothing), ($), pure, either, id, (-), (==), (&&), (<), (*), cos, sin, pi, (/), (>), const, uncurry, fromInteger, round, (/=), (||), not, null, fmap, (<>), otherwise)
 
-import Graphics.Implicit.Definitions (ℝ, ℝ2, ℝ3, ℕ, SymbolicObj2, SymbolicObj3, ExtrudeRMScale(C1), fromℕtoℝ, isScaleID)
+import Graphics.Implicit.Definitions (ℝ, ℝ2, ℝ3, ℕ, fromℕtoℝ)
+
+import Graphics.Implicit.Export.MySymbolicObj2 (MySymbolicObj2)
+import Graphics.Implicit.Export.MySymbolicObj3 (MySymbolicObj3, ExtrudeRMScale (C1), isScaleID )
+
+
 
 import Graphics.Implicit.ExtOpenScad.Definitions (OVal (OObj2, OObj3, ONModule), ArgParser, Symbol(Symbol), StateC, SourcePosition)
 
@@ -243,7 +248,7 @@ cylinder = moduleWithoutSuite "cylinder" $ \_ _ -> do
     let
         (h1, h2) = either (toInterval center) id h
         dh = h2 - h1
-        shift :: SymbolicObj3 -> SymbolicObj3
+        shift :: MySymbolicObj3 -> MySymbolicObj3
         shift =
             if h1 == 0
             then id
@@ -442,7 +447,7 @@ extrude = moduleWithSuite "linear_extrude" $ \_ children -> do
         height' = case height of
             Left a  -> Left a
             Right f -> Right $ uncurry f
-        shiftAsNeeded :: SymbolicObj3 -> SymbolicObj3
+        shiftAsNeeded :: MySymbolicObj3 -> MySymbolicObj3
         shiftAsNeeded =
             if center
             then Prim.translate (0,0,-heightn/2.0)
@@ -551,27 +556,27 @@ moduleWithSuite name modArgMapper = (Symbol name, modArgMapper)
 moduleWithoutSuite :: Text -> (SourcePosition -> [OVal] -> ArgParser (StateC [OVal])) -> (Symbol, SourcePosition -> [OVal] -> ArgParser (StateC [OVal]))
 moduleWithoutSuite name modArgMapper = (Symbol name, modArgMapper)
 
-addObj2 :: SymbolicObj2 -> ArgParser (StateC [OVal])
+addObj2 :: MySymbolicObj2 -> ArgParser (StateC [OVal])
 addObj2 x = pure $ pure [OObj2 x]
 
-addObj3 :: SymbolicObj3 -> ArgParser (StateC [OVal])
+addObj3 :: MySymbolicObj3 -> ArgParser (StateC [OVal])
 addObj3 x = pure $ pure [OObj3 x]
 
-objMap :: (SymbolicObj2 -> SymbolicObj2) -> (SymbolicObj3 -> SymbolicObj3) -> [OVal] -> [OVal]
+objMap :: (MySymbolicObj2 -> MySymbolicObj2) -> (MySymbolicObj3 -> MySymbolicObj3) -> [OVal] -> [OVal]
 objMap obj2mod obj3mod (x:xs) = case x of
     OObj2 obj2 -> OObj2 (obj2mod obj2) : objMap obj2mod obj3mod xs
     OObj3 obj3 -> OObj3 (obj3mod obj3) : objMap obj2mod obj3mod xs
     a          -> a                    : objMap obj2mod obj3mod xs
 objMap _ _ [] = []
 
-objReduce :: ([SymbolicObj2] -> SymbolicObj2) -> ([SymbolicObj3] -> SymbolicObj3) -> [OVal] -> [OVal]
+objReduce :: ([MySymbolicObj2] -> MySymbolicObj2) -> ([MySymbolicObj3] -> MySymbolicObj3) -> [OVal] -> [OVal]
 objReduce obj2reduce obj3reduce l = case divideObjs l of
     (   [],    [], others) ->                                                       others
     (   [], obj3s, others) ->                            OObj3 (obj3reduce obj3s) : others
     (obj2s,    [], others) -> OObj2 (obj2reduce obj2s)                            : others
     (obj2s, obj3s, others) -> OObj2 (obj2reduce obj2s) : OObj3 (obj3reduce obj3s) : others
 
-obj2UpMap :: (SymbolicObj2 -> SymbolicObj3) -> [OVal] -> [OVal]
+obj2UpMap :: (MySymbolicObj2 -> MySymbolicObj3) -> [OVal] -> [OVal]
 obj2UpMap obj2upmod (x:xs) = case x of
     OObj2 obj2 -> OObj3 (obj2upmod obj2) : obj2UpMap obj2upmod xs
     a          -> a                      : obj2UpMap obj2upmod xs

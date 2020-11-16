@@ -18,11 +18,14 @@ import Prelude (Read(readsPrec), Maybe(Just, Nothing), IO, Bool(True, False), Fi
 -- Our Extended OpenScad interpreter, and functions to write out files in designated formats.
 import Graphics.Implicit (runOpenscad, writeSVG, writeDXF2, writeBinSTL, writeSTL, writeOBJ, writeSCAD2, writeSCAD3, writeGCodeHacklabLaser, writePNG2, writePNG3)
 
--- Functions for finding a box around an object, so we can define the area we need to raytrace inside of.
-import Graphics.Implicit.ObjectUtil (getBox2, getBox3)
-
 -- Definitions of the datatypes used for 2D objects, 3D objects, and for defining the resolution to raytrace at.
-import Graphics.Implicit.Definitions (SymbolicObj2(UnionR2), SymbolicObj3(UnionR3), ℝ)
+import Graphics.Implicit.Definitions (ℝ)
+
+import Graphics.Implicit.Export.MySymbolicObj2 (MySymbolicObj2 (box2))
+import Graphics.Implicit.Export.MySymbolicObj3 (MySymbolicObj3 (box3))
+import Graphics.Implicit.Objects3 (union3)
+import Graphics.Implicit.Objects2 (union2)
+
 
 -- Use default values when a Maybe is Nothing.
 import Data.Maybe (fromMaybe, maybe)
@@ -190,14 +193,14 @@ instance Read OutputFormat where
               else tryParse xs
 
 -- | Find the resolution to raytrace at.
-getRes :: (VarLookup, [SymbolicObj2], [SymbolicObj3], [Message]) -> ℝ
+getRes :: (VarLookup, [MySymbolicObj2], [MySymbolicObj3], [Message]) -> ℝ
 -- | If specified, use a resolution specified by the "$res" a variable in the input file.
 getRes (lookupVarIn "$res" -> Just (ONum res), _, _, _) = res
 -- | If there was no resolution specified, use a resolution chosen for 3D objects.
 --   FIXME: magic numbers.
 getRes (vars, _, obj:objs, _) =
     let
-        ((x1,y1,z1),(x2,y2,z2)) = getBox3 (UnionR3 0 (obj:objs))
+        ((x1,y1,z1),(x2,y2,z2)) = box3 (union3 (obj:objs))
         (x,y,z) = (x2-x1, y2-y1, z2-z1)
     in case fromMaybe (ONum 1) $ lookupVarIn "$quality" vars of
         ONum qual | qual > 0  -> min (minimum [x,y,z]/2) ((x*y*z/qual)**(1/3) / 22)
@@ -206,7 +209,7 @@ getRes (vars, _, obj:objs, _) =
 --   FIXME: magic numbers.
 getRes (vars, obj:objs, _, _) =
     let
-        (p1,p2) = getBox2 (UnionR2 0 (obj:objs))
+        (p1,p2) = box2 (union2 (obj:objs))
         (x,y) = p2 .-. p1
     in case fromMaybe (ONum 1) $ lookupVarIn "$quality" vars of
         ONum qual | qual > 0 -> min (min x y/2) (sqrt(x*y/qual) / 30)
@@ -215,7 +218,7 @@ getRes (vars, obj:objs, _, _) =
 getRes _ = 1
 
 -- | Output a file containing a 3D object.
-export3 :: Maybe OutputFormat -> ℝ -> FilePath -> SymbolicObj3 -> IO ()
+export3 :: Maybe OutputFormat -> ℝ -> FilePath -> MySymbolicObj3 -> IO ()
 export3 posFmt res output obj =
     case posFmt of
         Just ASCIISTL -> writeSTL res output obj
@@ -227,7 +230,7 @@ export3 posFmt res output obj =
         Just fmt      -> putStrLn $ "Unrecognized 3D format: " <> show fmt
 
 -- | Output a file containing a 2D object.
-export2 :: Maybe OutputFormat -> ℝ -> FilePath -> SymbolicObj2 -> IO ()
+export2 :: Maybe OutputFormat -> ℝ -> FilePath -> MySymbolicObj2 -> IO ()
 export2 posFmt res output obj =
     case posFmt of
         Just SVG   -> writeSVG res output obj
@@ -307,11 +310,11 @@ run rawargs = do
                      (outputFile args)
             target = if null objs
                      then obj
-                     else UnionR3 0 (obj:objs)
+                     else union3 (obj:objs)
 
         if quiet args
           then return ()
-          else putStrLn $ objectMessage "3D" (inputFile args) output (show res) $ show $ getBox3 target
+          else putStrLn $ objectMessage "3D" (inputFile args) output (show res) $ show $ box3 target
 
         -- FIXME: construct and use a warning for this.
         if null objs
@@ -331,11 +334,11 @@ run rawargs = do
                      (outputFile args)
             target = if null objs
                      then obj
-                     else UnionR2 0 (obj:objs)
+                     else union2 (obj:objs)
 
         if quiet args
           then return ()
-          else putStrLn $ objectMessage "2D" (inputFile args) output (show res) $ show $ getBox2 target
+          else putStrLn $ objectMessage "2D" (inputFile args) output (show res) $ show $ box2 target
 
         -- FIXME: construct and use a warning for this.
         if null objs

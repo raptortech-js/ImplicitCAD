@@ -11,9 +11,9 @@ module Graphics.Implicit (
   W.ℝ,
   W.ℝ2,
   W.ℝ3,
-  SymbolicObj2 (),
-  SymbolicObj3 (),
-  W.ExtrudeRMScale(C1, C2, Fn),
+  MySymbolicObj2,
+  MySymbolicObj3,
+  Graphics.Implicit.Export.MySymbolicObj3.ExtrudeRMScale(C1, C2, Fn),
 
   -- * Shared operations
   P.Object
@@ -85,7 +85,9 @@ import Graphics.Implicit.Primitives as P (translate, scale, complement, union, i
 import Graphics.Implicit.ExtOpenScad as E (runOpenscad)
 
 -- typesclasses and types defining the world, or part of the world.
-import Graphics.Implicit.Definitions as W (ℝ, ℝ2, ℝ3, SymbolicObj2, SymbolicObj3, ExtrudeRMScale(C1, C2, Fn))
+import Graphics.Implicit.Definitions as W (ℝ, ℝ2, ℝ3)
+import Graphics.Implicit.Export.MySymbolicObj2 (MySymbolicObj2)
+import Graphics.Implicit.Export.MySymbolicObj3 (MySymbolicObj3, ExtrudeRMScale (C1, C2, Fn))
 
 -- Functions for writing files based on the result of operations on primitives.
 import qualified Graphics.Implicit.Export as Export (writeSVG, writeDXF2, writeSTL, writeBinSTL, writeOBJ, writeSCAD2, writeSCAD3, writeTHREEJS, writeGCodeHacklabLaser, writePNG)
@@ -98,7 +100,7 @@ writeSVG
           -- exports more faithful to the implicit model, at the expense of
           -- taking /O(n^-2)/ more time.
     -> FilePath
-    -> SymbolicObj2
+    -> MySymbolicObj2
     -> IO ()
 writeSVG = Export.writeSVG
 
@@ -107,7 +109,7 @@ writeDXF2
           -- exports more faithful to the implicit model, at the expense of
           -- taking /O(n^-2)/ more time.
     -> FilePath
-    -> SymbolicObj2
+    -> MySymbolicObj2
     -> IO ()
 writeDXF2 = Export.writeDXF2
 
@@ -116,7 +118,7 @@ writeSTL
           -- exports more faithful to the implicit model, at the expense of
           -- taking /O(n^-3)/ more time.
     -> FilePath
-    -> SymbolicObj3
+    -> MySymbolicObj3
     -> IO ()
 writeSTL = Export.writeSTL
 
@@ -125,7 +127,7 @@ writeBinSTL
           -- exports more faithful to the implicit model, at the expense of
           -- taking /O(n^-3)/ more time.
     -> FilePath
-    -> SymbolicObj3
+    -> MySymbolicObj3
     -> IO ()
 writeBinSTL = Export.writeBinSTL
 
@@ -134,7 +136,7 @@ writeOBJ
           -- exports more faithful to the implicit model, at the expense of
           -- taking /O(n^-3)/ more time.
     -> FilePath
-    -> SymbolicObj3
+    -> MySymbolicObj3
     -> IO ()
 writeOBJ = Export.writeOBJ
 
@@ -143,7 +145,7 @@ writeSCAD2
           -- exports more faithful to the implicit model, at the expense of
           -- taking /O(n^-2)/ more time.
     -> FilePath
-    -> SymbolicObj2
+    -> MySymbolicObj2
     -> IO ()
 writeSCAD2 = Export.writeSCAD2
 
@@ -152,7 +154,7 @@ writeSCAD3
           -- exports more faithful to the implicit model, at the expense of
           -- taking /O(n^-3)/ more time.
     -> FilePath
-    -> SymbolicObj3
+    -> MySymbolicObj3
     -> IO ()
 writeSCAD3 = Export.writeSCAD3
 
@@ -161,7 +163,7 @@ writeTHREEJS
           -- exports more faithful to the implicit model, at the expense of
           -- taking /O(n^-3)/ more time.
     -> FilePath
-    -> SymbolicObj3
+    -> MySymbolicObj3
     -> IO ()
 writeTHREEJS = Export.writeTHREEJS
 
@@ -170,7 +172,7 @@ writeGCodeHacklabLaser
           -- exports more faithful to the implicit model, at the expense of
           -- taking /O(n^-2)/ more time.
     -> FilePath
-    -> SymbolicObj2
+    -> MySymbolicObj2
     -> IO ()
 writeGCodeHacklabLaser = Export.writeGCodeHacklabLaser
 
@@ -179,7 +181,7 @@ writePNG2
           -- exports more faithful to the implicit model, at the expense of
           -- taking /O(n^-2)/ more time.
     -> FilePath
-    -> SymbolicObj2
+    -> MySymbolicObj2
     -> IO ()
 writePNG2 = Export.writePNG
 
@@ -192,7 +194,7 @@ writePNG3
           -- exports more faithful to the implicit model, at the expense of
           -- taking /O(n^-3)/ more time.
     -> FilePath
-    -> SymbolicObj3
+    -> MySymbolicObj3
     -> IO ()
 writePNG3 = Export.writePNG
 

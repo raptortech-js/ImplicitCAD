@@ -7,7 +7,8 @@ module Graphics.Implicit.ExtOpenScad (runOpenscad) where
 
 import Prelude(String, IO, ($), (<$>), pure, either, (.), Applicative, Bool(True))
 
-import Graphics.Implicit.Definitions (SymbolicObj2, SymbolicObj3)
+import Graphics.Implicit.Export.MySymbolicObj2 (MySymbolicObj2)
+import Graphics.Implicit.Export.MySymbolicObj3 (MySymbolicObj3)
 
 import Graphics.Implicit.ExtOpenScad.Definitions (VarLookup, ScadOpts, Message(Message), MessageType(SyntaxError), CompState(CompState, scadVars, oVals, messages), StatementI)
 
@@ -32,20 +33,20 @@ import Data.Foldable (traverse_)
 import Data.Text.Lazy (pack)
 
 -- | Small wrapper of our parser to handle parse errors, etc.
-runOpenscad :: ScadOpts -> [String] -> String -> IO (VarLookup, [SymbolicObj2], [SymbolicObj3], [Message])
+runOpenscad :: ScadOpts -> [String] -> String -> IO (VarLookup, [MySymbolicObj2], [MySymbolicObj3], [Message])
 runOpenscad scadOpts constants source = do
   (initialObjects, initialMessages) <- addConstants constants True
   let
-    err :: Applicative f => ParseError -> f (VarLookup, [SymbolicObj2], [SymbolicObj3], [Message])
+    err :: Applicative f => ParseError -> f (VarLookup, [MySymbolicObj2], [MySymbolicObj3], [Message])
     err e = pure (initialObjects, [], [], mesg e : initialMessages)
-    run :: [StatementI] -> IO (VarLookup, [SymbolicObj2], [SymbolicObj3], [Message])
+    run :: [StatementI] -> IO (VarLookup, [MySymbolicObj2], [MySymbolicObj3], [Message])
     run sts = rearrange <$> do
       let sts' = traverse_ runStatementI sts
       path <- getCurrentDirectory
       runStateT sts' $ CompState initialObjects [] path initialMessages scadOpts
   either err run $ parseProgram "" source
   where
-    rearrange :: ((), CompState) -> (VarLookup, [SymbolicObj2], [SymbolicObj3], [Message])
+    rearrange :: ((), CompState) -> (VarLookup, [MySymbolicObj2], [MySymbolicObj3], [Message])
     rearrange (_, s) =
       let (obj2s, obj3s, _) = divideObjs $ oVals s
       in (scadVars s, obj2s, obj3s, messages s)

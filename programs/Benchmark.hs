@@ -12,8 +12,12 @@ import Prelude (($), (*), (/), String, IO, cos, pi, fmap, zip3, Either(Left, Rig
 import Criterion.Main (Benchmark, bgroup, bench, nf, nfAppIO, defaultMain)
 
 -- The parts of ImplicitCAD we know how to benchmark.
-import Graphics.Implicit (union, circle, sphere, SymbolicObj2, SymbolicObj3, ExtrudeRMScale(C1), writeDXF2, writeSVG, writePNG2, writeSTL, writeBinSTL, unionR, translate, difference, extrudeRM, rect3R)
-import Graphics.Implicit.Export.SymbolicObj2 (symbolicGetContour)
+import Graphics.Implicit (ExtrudeRMScale(C1), writeDXF2, writeSVG, writePNG2, writeSTL, writeBinSTL, circle, sphere, union, unionR, translate, difference, extrudeRM, rect3R)
+--import Graphics.Implicit.Objects2 (unionR2)
+--import Graphics.Implicit.Objects3 (unionR3)
+import Graphics.Implicit.Export.MySymbolicObj2 (MySymbolicObj2)
+import Graphics.Implicit.Export.MySymbolicObj3 (MySymbolicObj3)
+import Graphics.Implicit.Export.SymbolicObj2 (symbolicGetContour2)
 import Graphics.Implicit.Export.SymbolicObj3 (symbolicGetMesh)
 
 -- The variables defining distance and counting in our world.
@@ -24,7 +28,7 @@ import Graphics.Implicit.Definitions (ℝ, Fastℕ)
 -- FIXME: move each of these objects into seperate compilable files.
 
 -- | What we extrude in the example on the website.
-obj2d_1 :: SymbolicObj2
+obj2d_1 :: MySymbolicObj2
 obj2d_1 =
     unionR 8
         [ circle 10
@@ -35,17 +39,17 @@ obj2d_1 =
         ]
 
 -- | An extruded version of obj2d_1, should be identical to the website's example, and example5.escad.
-object1 :: SymbolicObj3
+object1 :: MySymbolicObj3
 object1 = extrudeRM 0 (Right twist) (C1 1) (Left (0,0)) obj2d_1 (Left 40)
     where
       twist :: ℝ -> ℝ
       twist h = 35*cos(h*2*pi/60)
 
 -- | another 3D object, for benchmarking.
-object2 :: SymbolicObj3
+object2 :: MySymbolicObj3
 object2 = squarePipe (10,10,10) 1 100
     where
-      squarePipe :: (ℝ,ℝ,ℝ) -> ℝ -> ℝ -> SymbolicObj3
+      squarePipe :: (ℝ,ℝ,ℝ) -> ℝ -> ℝ -> MySymbolicObj3
       squarePipe (x,y,z) diameter precision =
             union
             ((\start-> translate start
@@ -57,7 +61,7 @@ object2 = squarePipe (10,10,10) 1 100
                    (fmap (\n->(fromIntegral n/precision)*z) [0..100::Fastℕ]))
 
 -- | A third 3d object to benchmark.
-object3 :: SymbolicObj3
+object3 :: MySymbolicObj3
 object3 =
     difference
         [ rect3R 1 (-1,-1,-1) (1,1,1)
@@ -65,24 +69,24 @@ object3 =
         ]
 
 -- | Example 13 - the rounded union of a cube and a sphere.
-object4 :: SymbolicObj3
+object4 :: MySymbolicObj3
 object4 = union [
                 rect3R 0 (0,0,0) (20,20,20),
                 translate (20,20,20) (sphere 15) ]
 
 -- | Benchmark a 2D object.
-obj2Benchmarks :: String -> String -> SymbolicObj2 -> Benchmark
+obj2Benchmarks :: String -> String -> MySymbolicObj2 -> Benchmark
 obj2Benchmarks name filename obj =
     bgroup name
     [
       bench "SVG write" $ nfAppIO (writeSVG 1 $ filename <> ".svg") obj,
       bench "PNG write" $ nfAppIO (writePNG2 1 $ filename <> ".png") obj,
       bench "DXF write" $ nfAppIO (writeDXF2 1 $ filename <> ".dxf") obj,
-      bench "Get contour" $ nf (symbolicGetContour 1) obj
+      bench "Get contour" $ nf (symbolicGetContour2 1) obj
     ]
 
 -- | Benchmark a 3D object.
-obj3Benchmarks :: String -> String -> SymbolicObj3 -> Benchmark
+obj3Benchmarks :: String -> String -> MySymbolicObj3 -> Benchmark
 obj3Benchmarks name filename obj =
     bgroup name
     [

@@ -11,7 +11,10 @@ module Graphics.Implicit.Export (writeObject, formatObject, writeSVG, writeSTL, 
 import Prelude (FilePath, IO, (.), ($))
 
 -- The types of our objects (before rendering), and the type of the resolution to render with.
-import Graphics.Implicit.Definitions (SymbolicObj2, SymbolicObj3, ℝ, Polyline, TriangleMesh, NormedTriangleMesh)
+import Graphics.Implicit.Definitions (ℝ, Polyline, TriangleMesh, NormedTriangleMesh)
+
+import Graphics.Implicit.Export.MySymbolicObj2 (MySymbolicObj2)
+import Graphics.Implicit.Export.MySymbolicObj3 (MySymbolicObj3)
 
 -- functions for outputing a file, and one of the types.
 import Data.Text.Lazy (Text)
@@ -79,10 +82,10 @@ writeTHREEJS res = writeObject res TriangleMeshFormats.jsTHREE
 writeGCodeHacklabLaser :: DiscreteAproxable obj [Polyline] => ℝ -> FilePath -> obj -> IO ()
 writeGCodeHacklabLaser res = writeObject res PolylineFormats.hacklabLaserGCode
 
-writeSCAD3 :: ℝ -> FilePath -> SymbolicObj3 -> IO ()
+writeSCAD3 :: ℝ -> FilePath -> MySymbolicObj3 -> IO ()
 writeSCAD3 res filename obj = LT.writeFile filename $ SymbolicFormats.scad3 res obj
 
-writeSCAD2 :: ℝ -> FilePath -> SymbolicObj2 -> IO ()
+writeSCAD2 :: ℝ -> FilePath -> MySymbolicObj2 -> IO ()
 writeSCAD2 res filename obj = LT.writeFile filename $ SymbolicFormats.scad2 res obj
 
 writePNG :: DiscreteAproxable obj ImageFormatCodecs.DynamicImage => ℝ -> FilePath -> obj -> IO ()

@@ -1,18 +1,16 @@
 module Graphics.Implicit.Export.MySymbolicObj3
-{-(
+(
     MySymbolicObj3 (
         MySymbolicObj3,
         implicit3,
         box3,
-        box3R,
-        symbolicGetContour3,
-        symbolicGetContourMesh3,
-        scad3
+        symbolicGetMesh,
+        myScad3
     ),
     ExtrudeRMScale (C1, C2, Fn),
     toScaleFn,
     isScaleID
-    )-}
+)
     where
 
 import Prelude(Either (Left, Right), Maybe, Show (show), Bool (True, False), String)

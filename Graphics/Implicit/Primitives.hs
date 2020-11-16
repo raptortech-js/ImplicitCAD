@@ -37,7 +37,12 @@ module Graphics.Implicit.Primitives (
                                      Object
                                     ) where
 
-import Prelude(Maybe(Just, Nothing), Either, fmap, ($))
+import Prelude(Maybe(Just, Nothing), Either, fmap, ($), undefined)
+
+import Graphics.Implicit.Export.MySymbolicObj2 (MySymbolicObj2 (box2))
+import Graphics.Implicit.Export.MySymbolicObj3 (MySymbolicObj3 (box3), ExtrudeRMScale)
+import Graphics.Implicit.Objects.UnionR3 (unionR3)
+import Graphics.Implicit.Objects.UnionR2 (unionR2)
 
 import Graphics.Implicit.Definitions (ℝ, ℝ2, ℝ3, Box2)
 import Graphics.Implicit.MathUtil   (pack)
@@ -46,59 +51,59 @@ import Graphics.Implicit.MathUtil   (pack)
 
 sphere ::
     ℝ                  -- ^ Radius of the sphere
-    -> SymbolicObj3    -- ^ Resulting sphere
+    -> MySymbolicObj3    -- ^ Resulting sphere
 
-sphere = Sphere
+sphere = undefined
 
 -- | A rectangular prism, with rounded corners.
 rect3R ::
     ℝ                 -- ^ Rounding of corners
     -> ℝ3             -- ^ Bottom.. corner
     -> ℝ3             -- ^ Top right... corner
-    -> SymbolicObj3   -- ^ Resuting cube - (0,0,0) is bottom left...
+    -> MySymbolicObj3   -- ^ Resuting cube - (0,0,0) is bottom left...
 
-rect3R = Rect3R
+rect3R = undefined
 
 -- | A conical frustum --- ie. a cylinder with different radii at either end.
 cylinder2 ::
     ℝ                   -- ^ Radius of the cylinder
     -> ℝ                -- ^ Second radius of the cylinder
     -> ℝ                -- ^ Height of the cylinder
-    -> SymbolicObj3     -- ^ Resulting cylinder
+    -> MySymbolicObj3     -- ^ Resulting cylinder
 
-cylinder2 r1 r2 h = Cylinder h r1 r2
+cylinder2 r1 r2 h = undefined
 
 cylinder ::
     ℝ                   -- ^ Radius of the cylinder
     -> ℝ                -- ^ Height of the cylinder
-    -> SymbolicObj3     -- ^ Resulting cylinder
+    -> MySymbolicObj3     -- ^ Resulting cylinder
 
-cylinder r = cylinder2 r r
+cylinder r = undefined
 
 -- $ 2D Primitives
 
 circle ::
     ℝ               -- ^ radius of the circle
-    -> SymbolicObj2 -- ^ resulting circle
+    -> MySymbolicObj2 -- ^ resulting circle
 
-circle   = Circle
+circle   = undefined
 
 -- | A rectangle, with rounded corners.
 rectR ::
     ℝ               -- ^ Rounding radius (in mm) of corners
     -> ℝ2           -- ^ Bottom left corner
     -> ℝ2           -- ^ Top right corner
-    -> SymbolicObj2 -- ^ Resulting square (bottom right = (0,0) )
+    -> MySymbolicObj2 -- ^ Resulting square (bottom right = (0,0) )
 
-rectR = RectR
+rectR = undefined
 
 -- | A 2D polygon, with rounded corners.
 polygonR ::
     ℝ                -- ^ Rounding radius (in mm) of the polygon
     -> [ℝ2]          -- ^ Verticies of the polygon
-    -> SymbolicObj2  -- ^ Resulting polygon
+    -> MySymbolicObj2  -- ^ Resulting polygon
 
-polygonR = PolygonR
+polygonR = undefined
 
 -- $ Shared Operations
 
@@ -144,6 +149,11 @@ class Object obj vec | obj -> vec where
         -> obj  -- ^ Object to scale
         -> obj  -- ^ Resulting scaled object
 
+    uniformScale ::
+        ℝ
+        -> obj
+        -> obj
+
     -- | Outset of an object.
     outset ::
         ℝ        -- ^ distance to outset
@@ -172,31 +182,33 @@ class Object obj vec | obj -> vec where
         -> obj         -- ^ Resulting object
 
 
-instance Object SymbolicObj2 ℝ2 where
-    translate   = Translate2
-    scale       = Scale2
-    complement  = Complement2
-    unionR      = UnionR2
-    intersectR  = IntersectR2
-    differenceR = DifferenceR2
-    outset      = Outset2
-    shell       = Shell2
-    getBox      = getBox2
-    getImplicit = getImplicit2
-    implicit a b= EmbedBoxedObj2 (a,b)
+instance Object MySymbolicObj2 ℝ2 where
+    scale       = undefined
+    uniformScale= undefined
+    complement  = undefined
+    unionR      = unionR2
+    intersectR  = undefined
+    differenceR = undefined
+    outset      = undefined
+    shell       = undefined
+    getBox      = undefined
+    getImplicit = undefined
+    implicit a b= undefined
+    translate   = undefined
 
-instance Object SymbolicObj3 ℝ3 where
-    translate   = Translate3
-    scale       = Scale3
-    complement  = Complement3
-    unionR      = UnionR3
-    intersectR  = IntersectR3
-    differenceR = DifferenceR3
-    outset      = Outset3
-    shell       = Shell3
-    getBox      = getBox3
-    getImplicit = getImplicit3
-    implicit a b= EmbedBoxedObj3 (a,b)
+instance Object MySymbolicObj3 ℝ3 where
+    scale       = undefined
+    uniformScale= undefined
+    complement  = undefined
+    unionR      = unionR3
+    intersectR  = undefined
+    differenceR = undefined
+    outset      = undefined
+    shell       = undefined
+    getBox      = undefined
+    getImplicit = undefined
+    implicit a b= undefined
+    translate   = undefined
 
 union :: Object obj vec => [obj] -> obj
 union = unionR 0
@@ -212,48 +224,48 @@ intersect = intersectR 0
 -- | Extrude a 2d object upwards, with rounded corners.
 extrudeR
     :: ℝ   -- ^ Rounding radius (in mm) of corners
-    -> SymbolicObj2
+    -> MySymbolicObj2
     -> ℝ   -- ^ Extrusion height
-    -> SymbolicObj3
-extrudeR = ExtrudeR
+    -> MySymbolicObj3
+extrudeR = undefined
 
 -- | This function is not implemented
-extrudeRotateR :: ℝ -> ℝ -> SymbolicObj2 -> ℝ -> SymbolicObj3
-extrudeRotateR = ExtrudeRotateR
+extrudeRotateR :: ℝ -> ℝ -> MySymbolicObj2 -> ℝ -> MySymbolicObj3
+extrudeRotateR = undefined
 
 extrudeRM :: ℝ              -- ^ rounding radius (in mm)
     -> Either ℝ (ℝ -> ℝ)    -- ^ twist
     -> ExtrudeRMScale       -- ^ scale
     -> Either ℝ2 (ℝ -> ℝ2)  -- ^ translate
-    -> SymbolicObj2         -- ^ object to extrude
+    -> MySymbolicObj2         -- ^ object to extrude
     -> Either ℝ (ℝ2 -> ℝ)   -- ^ height to extrude to
-    -> SymbolicObj3
-extrudeRM = ExtrudeRM
+    -> MySymbolicObj3
+extrudeRM = undefined
 
 
 rotateExtrude :: ℝ            -- ^ Angle to sweep to (in rad)
     -> (Maybe ℝ)              -- ^ Loop or path (rounded corner)
     -> (Either ℝ2 (ℝ -> ℝ2))  -- ^ translate
     -> (Either ℝ  (ℝ -> ℝ ))  -- ^ rotate
-    -> SymbolicObj2           -- ^ object to extrude
-    -> SymbolicObj3
-rotateExtrude = RotateExtrude
+    -> MySymbolicObj2           -- ^ object to extrude
+    -> MySymbolicObj3
+rotateExtrude = undefined
 
-extrudeOnEdgeOf :: SymbolicObj2 -> SymbolicObj2 -> SymbolicObj3
-extrudeOnEdgeOf = ExtrudeOnEdgeOf
+extrudeOnEdgeOf :: MySymbolicObj2 -> MySymbolicObj2 -> MySymbolicObj3
+extrudeOnEdgeOf = undefined
 
 -- | Rotate a 3D object via an Euler angle, measured in radians, along the
 -- world axis.
-rotate3 :: ℝ3 -> SymbolicObj3 -> SymbolicObj3
-rotate3 = Rotate3
+rotate3 :: ℝ3 -> MySymbolicObj3 -> MySymbolicObj3
+rotate3 = undefined
 
 -- | Rotate a 3D object along an arbitrary axis.
 rotate3V
     :: ℝ   -- ^ Angle of rotation
     -> ℝ3  -- ^ Axis of rotation
-    -> SymbolicObj3
-    -> SymbolicObj3
-rotate3V = Rotate3V
+    -> MySymbolicObj3
+    -> MySymbolicObj3
+rotate3V = undefined
 
 -- FIXME: shouldn't this pack into a 3d area, or have a 3d equivalent?
 -- | Attempt to pack multiple 3D objects into a fixed area. The @z@ coordinate
@@ -262,33 +274,33 @@ rotate3V = Rotate3V
 pack3
     :: ℝ2                  -- ^ Area to pack
     -> ℝ                   -- ^ Separation between objects
-    -> [SymbolicObj3]      -- ^ Objects to pack
-    -> Maybe SymbolicObj3  -- ^ 'Just' if the objects could be packed into the given area
+    -> [MySymbolicObj3]      -- ^ Objects to pack
+    -> Maybe MySymbolicObj3  -- ^ 'Just' if the objects could be packed into the given area
 pack3 (dx, dy) sep objs =
     let
         boxDropZ :: (ℝ3,ℝ3) -> (ℝ2,ℝ2)
         boxDropZ ((a,b,_),(d,e,_)) = ((a,b),(d,e))
-        withBoxes :: [(Box2, SymbolicObj3)]
-        withBoxes = fmap (\obj -> ( boxDropZ $ getBox3 obj, obj)) objs
+        withBoxes :: [(Box2, MySymbolicObj3)]
+        withBoxes = fmap (\obj -> ( boxDropZ $ box3 obj, obj)) objs
     in case pack ((0,0),(dx,dy)) sep withBoxes of
             (a, []) -> Just $ union $ fmap (\((x,y),obj) -> translate (x,y,0) obj) a
             _ -> Nothing
 
 -- 2D operations
 
-rotate :: ℝ -> SymbolicObj2 -> SymbolicObj2
-rotate = Rotate2
+rotate :: ℝ -> MySymbolicObj2 -> MySymbolicObj2
+rotate = undefined
 
 -- | Attempt to pack multiple 2D objects into a fixed area.
 pack2
     :: ℝ2                  -- ^ Area to pack
     -> ℝ                   -- ^ Separation between objects
-    -> [SymbolicObj2]      -- ^ Objects to pack
-    -> Maybe SymbolicObj2  -- ^ 'Just' if the objects could be packed into the given area
+    -> [MySymbolicObj2]      -- ^ Objects to pack
+    -> Maybe MySymbolicObj2  -- ^ 'Just' if the objects could be packed into the given area
 pack2 (dx, dy) sep objs =
     let
-        withBoxes :: [(Box2, SymbolicObj2)]
-        withBoxes = fmap (\obj -> ( getBox2 obj, obj)) objs
+        withBoxes :: [(Box2, MySymbolicObj2)]
+        withBoxes = fmap (\obj -> ( box2 obj, obj)) objs
     in case pack ((0,0),(dx,dy)) sep withBoxes of
             (a, []) -> Just $ union $ fmap (\((x,y),obj) -> translate (x,y) obj) a
             _ -> Nothing
