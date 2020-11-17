@@ -16,15 +16,15 @@
 import Prelude (Read(readsPrec), Maybe(Just, Nothing), IO, Bool(True, False), FilePath, Show, Eq, String, (<>), ($), (*), (/), (==), (>), (**), (-), readFile, minimum, drop, error, fst, min, sqrt, tail, take, length, putStrLn, show, (>>=), lookup, return, unlines, filter, not, null, (||), (&&), (.))
 
 -- Our Extended OpenScad interpreter, and functions to write out files in designated formats.
-import Graphics.Implicit (runOpenscad, writeSVG, writeDXF2, writeBinSTL, writeSTL, writeOBJ, writeSCAD2, writeSCAD3, writeGCodeHacklabLaser, writePNG2, writePNG3)
+import Graphics.Implicit (union, runOpenscad, writeSVG, writeDXF2, writeBinSTL, writeSTL, writeOBJ, writeSCAD2, writeSCAD3, writeGCodeHacklabLaser, writePNG2, writePNG3)
 
 -- Definitions of the datatypes used for 2D objects, 3D objects, and for defining the resolution to raytrace at.
 import Graphics.Implicit.Definitions (ℝ)
 
 import Graphics.Implicit.Export.MySymbolicObj2 (MySymbolicObj2 (box2))
 import Graphics.Implicit.Export.MySymbolicObj3 (MySymbolicObj3 (box3))
-import Graphics.Implicit.Objects3 (union3)
-import Graphics.Implicit.Objects2 (union2)
+--import Graphics.Implicit.Objects3 (union3)
+--import Graphics.Implicit.Objects2 (union2)
 
 
 -- Use default values when a Maybe is Nothing.
@@ -200,7 +200,7 @@ getRes (lookupVarIn "$res" -> Just (ONum res), _, _, _) = res
 --   FIXME: magic numbers.
 getRes (vars, _, obj:objs, _) =
     let
-        ((x1,y1,z1),(x2,y2,z2)) = box3 (union3 (obj:objs))
+        ((x1,y1,z1),(x2,y2,z2)) = box3 (union (obj:objs))
         (x,y,z) = (x2-x1, y2-y1, z2-z1)
     in case fromMaybe (ONum 1) $ lookupVarIn "$quality" vars of
         ONum qual | qual > 0  -> min (minimum [x,y,z]/2) ((x*y*z/qual)**(1/3) / 22)
@@ -209,7 +209,7 @@ getRes (vars, _, obj:objs, _) =
 --   FIXME: magic numbers.
 getRes (vars, obj:objs, _, _) =
     let
-        (p1,p2) = box2 (union2 (obj:objs))
+        (p1,p2) = box2 (union (obj:objs))
         (x,y) = p2 .-. p1
     in case fromMaybe (ONum 1) $ lookupVarIn "$quality" vars of
         ONum qual | qual > 0 -> min (min x y/2) (sqrt(x*y/qual) / 30)
@@ -310,7 +310,7 @@ run rawargs = do
                      (outputFile args)
             target = if null objs
                      then obj
-                     else union3 (obj:objs)
+                     else union (obj:objs)
 
         if quiet args
           then return ()
@@ -334,7 +334,7 @@ run rawargs = do
                      (outputFile args)
             target = if null objs
                      then obj
-                     else union2 (obj:objs)
+                     else union (obj:objs)
 
         if quiet args
           then return ()

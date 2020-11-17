@@ -16,8 +16,6 @@ data MySymbolicObj2 = MySymbolicObj2
     , box2R     :: Maybe (ℝ -> Box2)
     , symbolicGetContour :: Maybe (ℝ -> [Polyline])
     , symbolicGetContourMesh :: Maybe (ℝ -> [Polytri])
-
---    , symbolicGetMesh :: Maybe (ℝ -> TriangleMesh)
     , myScad2 :: Reader ℝ Builder
     , myShow :: String
     }

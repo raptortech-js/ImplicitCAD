@@ -52,7 +52,8 @@ Library
                   storable-endian,
                   JuicyPixels,
                   transformers,
-                  mtl
+                  mtl,
+                  ghc
 
     Ghc-options:
 --                -O2
@@ -80,8 +81,8 @@ Library
                     Graphics.Implicit.Export
                     Graphics.Implicit.MathUtil
                     Graphics.Implicit.ExtOpenScad
-                    Graphics.Implicit.Objects3
-                    Graphics.Implicit.Objects2
+                    --Graphics.Implicit.Objects3
+                    --Graphics.Implicit.Objects2
                     -- These modules are exposed for the unit tests against the parser interface.
                     Graphics.Implicit.ExtOpenScad.Parser.Statement
                     Graphics.Implicit.ExtOpenScad.Parser.Expr
@@ -130,6 +131,10 @@ Library
 
                   Graphics.Implicit.Objects.UnionR3
                   Graphics.Implicit.Objects.UnionR2
+                  Graphics.Implicit.Objects.Util
+                  Graphics.Implicit.Objects.Miscellany3
+                  Graphics.Implicit.Objects.Miscellany2
+                  Graphics.Implicit.Objects.RotateExtrude
 
 Executable extopenscad
    if !flag(extopenscad)

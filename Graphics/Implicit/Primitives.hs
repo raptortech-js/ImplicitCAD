@@ -43,6 +43,9 @@ import Graphics.Implicit.Export.MySymbolicObj2 (MySymbolicObj2 (box2))
 import Graphics.Implicit.Export.MySymbolicObj3 (MySymbolicObj3 (box3), ExtrudeRMScale)
 import Graphics.Implicit.Objects.UnionR3 (unionR3)
 import Graphics.Implicit.Objects.UnionR2 (unionR2)
+import Graphics.Implicit.Objects.Miscellany3 (intersectR3, conicalFrustrum)
+import Graphics.Implicit.Objects.Miscellany2 (polygonR2)
+import Graphics.Implicit.Objects.RotateExtrude (rotateExtrude2)
 
 import Graphics.Implicit.Definitions (ℝ, ℝ2, ℝ3, Box2)
 import Graphics.Implicit.MathUtil   (pack)
@@ -71,14 +74,14 @@ cylinder2 ::
     -> ℝ                -- ^ Height of the cylinder
     -> MySymbolicObj3     -- ^ Resulting cylinder
 
-cylinder2 r1 r2 h = undefined
+cylinder2 = conicalFrustrum
 
 cylinder ::
     ℝ                   -- ^ Radius of the cylinder
     -> ℝ                -- ^ Height of the cylinder
     -> MySymbolicObj3     -- ^ Resulting cylinder
 
-cylinder r = undefined
+cylinder r = cylinder2 r r
 
 -- $ 2D Primitives
 
@@ -103,7 +106,7 @@ polygonR ::
     -> [ℝ2]          -- ^ Verticies of the polygon
     -> MySymbolicObj2  -- ^ Resulting polygon
 
-polygonR = undefined
+polygonR = polygonR2
 
 -- $ Shared Operations
 
@@ -201,7 +204,7 @@ instance Object MySymbolicObj3 ℝ3 where
     uniformScale= undefined
     complement  = undefined
     unionR      = unionR3
-    intersectR  = undefined
+    intersectR  = intersectR3
     differenceR = undefined
     outset      = undefined
     shell       = undefined
@@ -249,7 +252,7 @@ rotateExtrude :: ℝ            -- ^ Angle to sweep to (in rad)
     -> (Either ℝ  (ℝ -> ℝ ))  -- ^ rotate
     -> MySymbolicObj2           -- ^ object to extrude
     -> MySymbolicObj3
-rotateExtrude = undefined
+rotateExtrude = rotateExtrude2
 
 extrudeOnEdgeOf :: MySymbolicObj2 -> MySymbolicObj2 -> MySymbolicObj3
 extrudeOnEdgeOf = undefined
